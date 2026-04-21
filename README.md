@@ -47,3 +47,25 @@ cukup ditulis satu kali di luar blok kondisional. Pendekatan ini membuat kode me
 dibaca, dan di-maintain ke depannya sesuai prinsip DRY (Don't Repeat Yourself). Berikut ada contoh tampilan
 web apabila request yang dikirim ke server tidak valid :
 ![Commit 3 screen capture](/assets/images/commit3.png) 
+
+# Commit 4 Reflection Notes  
+Sejauh ini server berfungsi dengan baik untuk satu request. Namun, pada milestone ini saya mulai mengungkap
+kelemahan mendasar dari arsitektur single-threaded yang selama ini digunakan. Untuk mensimulasikannya,
+ditambahkan endpoint /sleep yang sengaja menunda respons selama 10 detik menggunakan
+```rust
+use std::thread;
+use std::time::Duration;
+
+thread::sleep(Duration::from_secs(10));
+```
+Saat dua tab browser dibuka secara bersamaan — satu menuju /sleep dan satu lagi menuju / — terlihat jelas bahwa
+tab kedua pun ikut menunggu hingga request pertama selesai, meskipun secara logis seharusnya langsung mendapat
+respons. Hal ini terjadi karena server berjalan hanya pada satu thread, sehingga seluruh proses bersifat
+sekuensial. Server hanya bisa menangani satu koneksi dalam satu waktu; koneksi berikutnya harus mengantri dan
+menunggu koneksi sebelumnya selesai diproses sepenuhnya. Dalam skenario nyata dengan banyak pengguna, satu
+request yang lambat atau berat akan memblokir semua request lainnya, membuat server menjadi tidak responsif.
+Simulasi ini menjadi motivasi yang kuat untuk beralih ke arsitektur yang lebih baik. Jelas bahwa
+single-threaded server tidak cukup untuk menangani beban kerja yang nyata, dan solusinya adalah 
+mengimplementasikan mekanisme konkurensi yaitu multithreaded server yang akan dibangun pada milestone
+berikutnya. Pada gambar di bawah ini dapat pada request kedua masih menunggu server
+![Commit 4 screen capture](/assets/images/commit4.png) 
