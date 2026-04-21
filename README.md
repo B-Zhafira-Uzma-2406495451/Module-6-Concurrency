@@ -30,3 +30,20 @@ pemisah antara header dan body. Tanpa salah satu dari elemen ini, browser tidak 
 dengan benar. Terakhir, respons yang telah dirakit dikirimkan kembali ke browser melalui stream.write_all().  
 Hasil tampilan web akan terlihat seperti ini :
 ![Commit 2 screen capture](/assets/images/commit2.png)  
+
+# Commit 3 Reflection Notes 
+Pada milestone sebelumnya, server selalu mengembalikan hello.html untuk setiap request apapun tanpa terkecuali.
+Tentu saja perilaku seperti ini tidak mencerminkan cara kerja web server yang sesungguhnya. Oleh karena itu,
+pada milestone ini server ditingkatkan agar mampu memvalidasi request dan memberikan respons yang sesuai.
+Caranya adalah dengan membaca request line pertama dari HTTP request, lalu mencocokkannya menggunakan kondisi
+if-else. Jika request line adalah "GET / HTTP/1.1", server mengembalikan hello.html dengan status 200 OK. Untuk
+request lainnya yang tidak dikenali, server mengembalikan 404.html dengan status 404 NOT FOUND. Dengan begitu,
+mengakses http://127.0.0.1:7878/bad akan menampilkan halaman "Oops!", sedangkan http://127.0.0.1:7878 tetap
+menampilkan halaman "Hello!". Selain validasi, pada milestone ini juga dilakukan refactoring terhadap kode.
+Tanpa refactoring, blok if dan else masing-masing berisi logika yang hampir identik untuk membaca file dan
+memformat respons, sehingga terjadi duplikasi kode yang tidak perlu. Dengan refactoring, percabangan hanya
+menentukan dua variabel yaitu status_line dan filename sementara proses membaca file dan membangun respons
+cukup ditulis satu kali di luar blok kondisional. Pendekatan ini membuat kode menjadi lebih ringkas, mudah
+dibaca, dan di-maintain ke depannya sesuai prinsip DRY (Don't Repeat Yourself). Berikut ada contoh tampilan
+web apabila request yang dikirim ke server tidak valid :
+![Commit 3 screen capture](/assets/images/commit3.png) 
