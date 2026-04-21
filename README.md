@@ -69,3 +69,18 @@ single-threaded server tidak cukup untuk menangani beban kerja yang nyata, dan s
 mengimplementasikan mekanisme konkurensi yaitu multithreaded server yang akan dibangun pada milestone
 berikutnya. Pada gambar di bawah ini dapat pada request kedua masih menunggu server
 ![Commit 4 screen capture](/assets/images/commit4.png) 
+
+# Commit 5 Reflection Notes 
+Untuk mengatasi keterbatasan arsitektur single-threaded pada milestone sebelumnya, saya
+mengimplementasikan ThreadPool kustom di lib.rs guna meningkatkan efisiensi penggunaan sumber
+daya sistem. Dibandingkan membuat thread baru untuk setiap permintaan yang masuk, sistem ini
+menyiapkan sejumlah thread workers yang tetap aktif untuk menangani delegasi koneksi melalui
+metode execute. Secara teknis, ThreadPool menggunakan mpsc::channel untuk mengirimkan Job
+berupa closure yang dibungkus dalam Box kepada Worker yang berjalan dalam loop tertutup untuk
+terus menunggu tugas. Agar receiver dapat diakses secara aman oleh banyak worker tanpa terjadi
+race condition, saya menerapkan pola idiomatis Rust menggunakan Arc untuk kepemilikan bersama
+lintas thread dan Mutex untuk sinkronisasi penguncian tugas. Implementasi ini secara 
+signifikan meningkatkan responsivitas server, di mana permintaan yang lambat seperti /sleep
+tidak lagi memblokir permintaan lainnya karena tersedia worker lain yang melayani secara
+paralel. Hasil akhirnya, server kini jauh lebih stabil dan siap melayani banyak pengguna
+secara bersamaan tanpa hambatan performa.
